@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#07070a">
+<title>MIBLOX</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23ff6900'/%3E%3Cpath d='M8 24V9h4l4 6 4-6h4v15h-4v-8l-4 6-4-6v8z' fill='%231a0b02'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="splash">
+  <div class="splash-inner">
+    <div class="splash-logo"><span>M</span></div>
+    <div class="splash-word">MIBLOX</div>
+    <div class="splash-sub">Hyper Edition</div>
+    <div class="splash-bar"><i></i></div>
+  </div>
+</div>
+
+<div id="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">M</div>
+      <div class="brand-txt">
+        <h1>MIBLOX</h1>
+        <p>hyper edition</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="icon-btn" id="soundBtn" aria-label="Sound"></button>
+      <button class="avatar-btn" id="avatarBtn" aria-label="Profile"><span></span></button>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- HOME -->
+    <section class="screen active" id="screen-home">
+      <div class="greet">
+        <div>
+          <p class="eyebrow">WEDNESDAY, 22 OCT</p>
+          <h2>Ready to play<span class="dot">.</span></h2>
+        </div>
+        <div class="credits"><span class="coin-ico"></span><b id="homeCredits">0</b></div>
+      </div>
+
+      <div class="search-pill" id="homeSearch">
+        <svg viewBox="0 0 24 24" class="ico"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+        <span>Search games, worlds, people</span>
+      </div>
+
+      <div id="featuredCard"></div>
+
+      <div class="sec-head">
+        <h3>Continue playing</h3>
+        <button class="link" data-goto="games">See all</button>
+      </div>
+      <div class="hrow" id="continueRow"></div>
+
+      <div class="sec-head">
+        <h3>Top picks for you</h3>
+        <button class="link" data-goto="games">See all</button>
+      </div>
+      <div class="grid2" id="topGrid"></div>
+
+      <div class="banner">
+        <div class="banner-glow"></div>
+        <div>
+          <p class="eyebrow">HYPER PASS</p>
+          <h4>Unlock 3 new worlds</h4>
+          <p class="dim small">Season 2 · ends in 6 days</p>
+        </div>
+        <button class="pill-mini" id="passBtn">View</button>
+      </div>
+    </section>
+
+    <!-- GAMES -->
+    <section class="screen" id="screen-games">
+      <div class="greet">
+        <div>
+          <p class="eyebrow">DISCOVER</p>
+          <h2>Experiences</h2>
+        </div>
+      </div>
+      <div class="search-pill live">
+        <svg viewBox="0 0 24 24" class="ico"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+        <input id="gameSearch" placeholder="Search experiences" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="chips" id="filterChips">
+        <button class="chip on" data-filter="all">All</button>
+        <button class="chip" data-filter="obby">Obby</button>
+        <button class="chip" data-filter="collect">Collect</button>
+        <button class="chip" data-filter="tower">Tower</button>
+        <button class="chip" data-filter="hard">Hard</button>
+      </div>
+      <div id="allGames" class="stack"></div>
+    </section>
+
+    <!-- AVATAR -->
+    <section class="screen" id="screen-avatar">
+      <div class="greet">
+        <div>
+          <p class="eyebrow">CUSTOMIZE</p>
+          <h2>Your avatar</h2>
+        </div>
+        <div class="credits"><span class="coin-ico"></span><b id="avCredits">0</b></div>
+      </div>
+      <div class="stage">
+        <canvas id="avatarCanvas"></canvas>
+        <div class="stage-tag">LIVE PREVIEW</div>
+      </div>
+      <div class="custom">
+        <div class="custom-group">
+          <p class="label">Shirt</p>
+          <div class="swatches" id="swShirt"></div>
+        </div>
+        <div class="custom-group">
+          <p class="label">Pants</p>
+          <div class="swatches" id="swPants"></div>
+        </div>
+        <div class="custom-group">
+          <p class="label">Skin</p>
+          <div class="swatches" id="swSkin"></div>
+        </div>
+      </div>
+      <button class="btn-primary" id="saveLook">Save look</button>
+    </section>
+
+    <!-- PROFILE -->
+    <section class="screen" id="screen-profile">
+      <div class="profile-head">
+        <div class="avatar-big" id="profileAvatar"><span></span></div>
+        <div class="profile-meta">
+          <h2 id="profileName">Player</h2>
+          <p class="dim small">Joined October 2026 · Hyper member</p>
+          <div class="lvl"><span>LV</span><b id="profileLvl">1</b></div>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><p>Credits</p><b id="statCredits">0</b></div>
+        <div class="stat"><p>Coins</p><b id="statCoins">0</b></div>
+        <div class="stat"><p>Clears</p><b id="statClears">0</b></div>
+      </div>
+
+      <div class="sec-head"><h3>Settings</h3></div>
+      <div class="card-list">
+        <div class="row-item">
+          <div class="ri-ico accent"></div>
+          <div class="ri-txt"><b>Sound effects</b><span>Synth blips in game</span></div>
+          <button class="toggle on" id="tgSound"></button>
+        </div>
+        <div class="row-item">
+          <div class="ri-ico violet"></div>
+          <div class="ri-txt"><b>Shadows</b><span>Turn off for low-end phones</span></div>
+          <button class="toggle on" id="tgShadows"></button>
+        </div>
+        <div class="row-item">
+          <div class="ri-ico blue"></div>
+          <div class="ri-txt"><b>Haptics</b><span>Vibrate on jump and pickup</span></div>
+          <button class="toggle on" id="tgHaptics"></button>
+        </div>
+      </div>
+
+      <div class="sec-head"><h3>About</h3></div>
+      <div class="card-list">
+        <div class="row-item">
+          <div class="ri-ico gray"></div>
+          <div class="ri-txt"><b>MIBLOX Hyper Edition</b><span>v1.0.0 · build 100 · offline</span></div>
+        </div>
+        <div class="row-item">
+          <div class="ri-ico gray"></div>
+          <div class="ri-txt"><b>Disclaimer</b><span>Original blocky sandbox. Not affiliated with Roblox Corporation.</span></div>
+        </div>
+      </div>
+      <div class="spacer"></div>
+    </section>
+  </main>
+
+  <nav class="tabbar" id="tabbar">
+    <button class="tab on" data-tab="home">
+      <svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1Z"/></svg>
+      <span>Home</span>
+    </button>
+    <button class="tab" data-tab="games">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m15.5 8.5-2 5-5 2 2-5Z"/></svg>
+      <span>Discover</span>
+    </button>
+    <button class="tab" data-tab="avatar">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-4 3.2-6 7-6s7 2 7 6"/></svg>
+      <span>Avatar</span>
+    </button>
+    <button class="tab" data-tab="profile">
+      <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="1.6" fill="currentColor"/><circle cx="15" cy="12" r="1.6" fill="currentColor"/><circle cx="8" cy="17" r="1.6" fill="currentColor"/></svg>
+      <span>Profile</span>
+    </button>
+  </nav>
+</div>
+
+<!-- GAME -->
+<div id="game" class="game hidden">
+  <canvas id="scene"></canvas>
+  <div class="hud">
+    <button class="round-btn" id="exitGame" aria-label="Exit">
+      <svg viewBox="0 0 24 24"><path d="M14.5 5 7 12l7.5 7"/></svg>
+    </button>
+    <div class="hud-mid">
+      <div class="hud-chip"><span class="coin-ico sm"></span><b id="hudCoins">0</b><i id="hudTotal">/ 0</i></div>
+      <div class="hud-chip ghost" id="hudTimer">0:00</div>
+    </div>
+    <button class="round-btn" id="resetGame" aria-label="Respawn">
+      <svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v5h-5"/></svg>
+    </button>
+  </div>
+  <div class="world-name" id="worldName">Sky Obby</div>
+  <div class="joy" id="joy"><i class="knob"></i></div>
+  <button class="jump-btn" id="jumpBtn"><span>JUMP</span></button>
+  <div class="toast-game" id="gameToast"></div>
+
+  <div class="result hidden" id="result">
+    <div class="result-card">
+      <p class="eyebrow" id="resultEyebrow">WORLD CLEARED</p>
+      <h2 id="resultTitle">Nice run!</h2>
+      <p class="dim" id="resultSub">You collected every coin.</p>
+      <div class="result-stats">
+        <div><p>Coins</p><b id="resCoins">0</b></div>
+        <div><p>Time</p><b id="resTime">0:00</b></div>
+        <div><p>Credits</p><b id="resCredits">0</b></div>
+      </div>
+      <button class="btn-primary" id="againBtn">Play again</button>
+      <button class="btn-ghost" id="backBtn">Back to MIBLOX</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="js/three.min.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
