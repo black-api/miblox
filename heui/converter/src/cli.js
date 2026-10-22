@@ -47,12 +47,17 @@ export function checkWebViewCompatibility(code) {
     { pattern: /\?\./, name: 'optional chaining (?.)', since: 'Chrome 80' },
     { pattern: /\?\?/, name: 'nullish coalescing (??)', since: 'Chrome 80' },
     { pattern: /\?\?=/, name: 'logical assignment (??=)', since: 'Chrome 85' },
+    { pattern: /\|\|=/, name: 'logical assignment (||=)', since: 'Chrome 85' },
+    { pattern: /&&=/, name: 'logical assignment (&&=)', since: 'Chrome 85' },
     { pattern: /#\s*[A-Za-z_$][\w$]*\s*[;=(]/, name: 'private class fields', since: 'Chrome 74' },
     { pattern: /\bstatic\s*\{/, name: 'static class blocks', since: 'Chrome 94' },
     { pattern: /\.at\s*\(/, name: 'Array.prototype.at', since: 'Chrome 92' },
     { pattern: /\bstructuredClone\s*\(/, name: 'structuredClone', since: 'Chrome 98' },
     { pattern: /\.replaceAll\s*\(/, name: 'String.replaceAll', since: 'Chrome 85' },
     { pattern: /\bObject\.hasOwn\s*\(/, name: 'Object.hasOwn', since: 'Chrome 93' },
+    { pattern: /\bPromise\.allSettled\b/, name: 'Promise.allSettled', since: 'Chrome 76' },
+    { pattern: /\bObject\.fromEntries\s*\(/, name: 'Object.fromEntries', since: 'Chrome 73' },
+    { pattern: /\.matchAll\s*\(/, name: 'String.matchAll', since: 'Chrome 73' },
   ];
   const problems = banned
     .filter((rule) => rule.pattern.test(code))

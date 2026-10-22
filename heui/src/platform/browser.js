@@ -13,15 +13,44 @@ export class BrowserPlatform {
     return performance.now() / 1000;
   }
 
+  /**
+   * Loads an asset.
+   *
+   * XMLHttpRequest is used instead of fetch(): it works on every WebView
+   * ever shipped (fetch needs Chrome 42) and, because the game is served
+   * from a real origin, the request is same-origin.
+   */
   loadAsset(path, type = 'text') {
     const url = `${this.assetBase}${path}`;
-    if (type === 'json') {
-      return fetch(url).then((response) => response.json());
-    }
-    if (type === 'text') {
-      return fetch(url).then((response) => response.text());
-    }
-    return fetch(url).then((response) => response.arrayBuffer());
+    return new Promise((resolve, reject) => {
+      try {
+        const request = new XMLHttpRequest();
+        request.open('GET', url, true);
+        request.onload = () => {
+          if (request.status < 200 || request.status >= 300) {
+            reject(new Error(`asset ${url} failed with status ${request.status}`));
+            return;
+          }
+          if (type === 'json') {
+            try {
+              resolve(JSON.parse(request.responseText));
+            } catch (error) {
+              reject(error);
+            }
+            return;
+          }
+          if (type === 'binary') {
+            resolve(request.response);
+            return;
+          }
+          resolve(request.responseText);
+        };
+        request.onerror = () => reject(new Error(`asset ${url} could not be loaded`));
+        request.send();
+      } catch (error) {
+        reject(error);
+      }
+    });
   }
 
   playSound(clip, player) {
