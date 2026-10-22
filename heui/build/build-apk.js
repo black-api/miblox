@@ -344,11 +344,32 @@ export function buildApk(projectDir, { release = false, outDir = null, skipNativ
     encoding: 'utf8',
   });
 
+  // The APK must actually contain the game and the host code. A missing
+  // entry is the difference between a game and a blank screen.
+  const entries = execFileSync('unzip', ['-Z1', finalApk], { encoding: 'utf8' })
+    .split('\n')
+    .filter(Boolean);
+  const required = [
+    'classes.dex',
+    'assets/heui/index.html',
+    'assets/heui/heui.js',
+    'assets/heui/manifest.json',
+    'res/xml/network_security_config.xml',
+  ];
+  const missing = required.filter((entry) => !entries.includes(entry));
+  if (missing.length > 0) {
+    throw new Error(`the APK is missing required entries: ${missing.join(', ')}`);
+  }
+  if (!entries.some((entry) => entry.endsWith('/libhe.so'))) {
+    throw new Error('the APK contains no native core (libhe.so) — is the NDK missing?');
+  }
+
   const size = fs.statSync(finalApk).size;
   log(`  apk      : ${path.relative(repoRoot, finalApk)} (${(size / 1024).toFixed(1)} kB)`);
   log(`  verify   : ${verify.split('\n')[0]}`);
+  log(`  contents : ${entries.length} entries, game + host + native core present`);
 
-  return { apk: finalApk, badging, verify, size, manifest: values };
+  return { apk: finalApk, badging, verify, size, entries, manifest: values };
 }
 
 function main(argv) {

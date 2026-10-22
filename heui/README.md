@@ -30,6 +30,12 @@ on the desktop for fast iteration.
 | Sample game (`apps/`)       | Gem Hunt — playable, headless-verified                        |
 | Tests                       | 28 JS tests + 3 native suites                                  |
 
+> **Note on the Android host:** the game is served to the WebView from a
+> loopback HTTP server (`http://127.0.0.1`), not from `file:///android_asset`.
+> Several ROMs — MIUI among them — render a blank grey error page for
+> `file://` URLs, and a `file://` page has a null origin, so the game could
+> not fetch its own assets. See [docs/miui.md](docs/miui.md).
+
 ## Layout
 
 | Path         | What lives there                                                        |

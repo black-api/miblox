@@ -51,15 +51,43 @@ screen is turned off.
 
 The JavaScript runtime runs inside a `WebView`.
 
+### The page is served over http://127.0.0.1, not file://
+
+This is the single most important rule for this host, and it was learned the
+hard way: **loading `file:///android_asset/...` in the system WebView does not
+work on several ROMs.** The navigation either fails or the WebView paints its
+own error page, which is a blank **grey** rectangle — the user sees a grey
+screen and nothing else.
+
+The host therefore runs a small loopback HTTP server (`HeAssetServer`) that
+serves `assets/heui/` on `127.0.0.1` and loads
+`http://127.0.0.1:<port>/index.html` from it. A real origin also fixes the
+second problem with `file://`: a `file://` page has a null origin, so **every
+`fetch()` of the game's own assets is blocked by CORS**. Over loopback the
+page and its assets share an origin and the palette loads normally.
+
+Consequences that must not be forgotten:
+
+- The app needs the `INTERNET` permission (creating a socket requires it).
+- Cleartext must be allowed for the loopback interface only, via
+  `res/xml/network_security_config.xml`. On Android 9+ cleartext is blocked by
+  default and the WebView would show another grey error page.
+- `setAllowFileAccess(false)` is deliberate: the game never needs `file://`.
+
+### The rest
+
 - `setJavaScriptEnabled(true)` with `addJavascriptInterface` limited to the
   `HeUiHost` object, which is only ever handed our own asset bundle.
-- `setDomStorageEnabled(false)`: the game keeps no state in the DOM storage,
-  so a WebView data wipe cannot corrupt a save.
-- The page is loaded from `file:///android_asset/heui/index.html`. ES modules
-  are blocked over `file://` by CORS, which is why the converter emits a
-  single classic script instead of a module graph.
+- `setDomStorageEnabled(true)`: the game may use `localStorage` for saves, and
+  a same-origin page (unlike `file://`) gets a stable, writable origin.
 - `setCacheMode(LOAD_NO_CACHE)` so an updated bundle is never masked by a
   stale WebView cache after an app update.
+- A load failure is never silent: `onReceivedError` for the main frame and a
+  failure to start the server both replace the WebView with a readable error
+  message. A blank screen is a bug, not a state.
+- The build verifies that the APK really contains `classes.dex`, the game
+  bundle and the network security config, so a packaging mistake fails the
+  build instead of shipping a grey screen.
 
 ## 6. Input
 
