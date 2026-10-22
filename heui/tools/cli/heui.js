@@ -106,7 +106,7 @@ async function runPreview(projectDir) {
   return runPreview(projectDir);
 }
 
-function doctor() {
+async function doctor() {
   const sdk = findSdk();
   log('heui doctor');
   log(`  node      : ${process.version}`);
@@ -121,7 +121,24 @@ function doctor() {
   log(`  java      : ${hasCommand('java') ? 'yes' : 'no'}`);
   log(`  cmake     : ${hasCommand('cmake') ? 'yes' : 'no'}`);
   log(`  zip       : ${hasCommand('zip') ? 'yes' : 'no'}`);
+  await reportSigningKey();
   return 0;
+}
+
+/**
+ * Shows the signing key and its fingerprint. It is the usual suspect when an
+ * update is refused with "There was a problem parsing the package": Android
+ * refuses to replace an installed app with a build signed by another key.
+ */
+async function reportSigningKey() {
+  const { resolveKeystore, certificateFingerprint } = await import('../../build/build-apk.js');
+  const keystore = resolveKeystore();
+  if (!fs.existsSync(keystore)) {
+    log(`  signing   : ${keystore} (not created yet)`);
+    return;
+  }
+  log(`  signing   : ${keystore}`);
+  log(`  cert      : ${certificateFingerprint(keystore)}`);
 }
 
 function hasCommand(command) {
@@ -171,8 +188,7 @@ async function main(argv) {
       return 0;
     }
     case 'doctor':
-      return doctor();
-    case undefined:
+      return doctor();    case undefined:
     case '--help':
     case '-h':
       return usage();

@@ -52,6 +52,8 @@ async function main(argv) {
     package: result.manifest.applicationId,
     minSdk: Number(result.manifest.minSdk),
     targetSdk: Number(result.manifest.targetSdk),
+    signingKey: result.keystore,
+    certificateSha256: result.certificate,
     artifacts,
   };
   fs.writeFileSync(

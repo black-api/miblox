@@ -98,7 +98,31 @@ Consequences that must not be forgotten:
 - The back button is forwarded to the script host first; the game decides
   whether to consume it.
 
-## 7. What to test on a real device
+## 7. Signing: one key for one package
+
+Android refuses to replace an installed app with a build signed by a
+**different** key. The failure is reported as *"There was a problem parsing
+the package"* (`INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES`) — which looks
+like a broken APK but is really a key mismatch.
+
+The key therefore lives **outside every repository**, in
+`~/.android/heui-debug.keystore`, and is created once by the build script.
+Any checkout of the engine, in any project, signs `dev.heui.gemhunt` with the
+same certificate, so an update always replaces the previous build.
+
+Rules:
+
+- Never put a keystore inside a repository, and never generate one per
+  checkout — that is exactly how the two-certificate situation appears.
+- `heui doctor` prints the key path and the certificate fingerprint; compare
+  it when an install is refused.
+- `HEUI_KEYSTORE=/path/to/key.jks` overrides the location.
+- If the key is lost, the old app can no longer be updated: uninstall it
+  first (`adb uninstall dev.heui.gemhunt`), then install the new build.
+- The build prints the fingerprint and records it in `release.json`, so a
+  released artifact can always be traced to the key that signed it.
+
+## 8. What to test on a real device
 
 1. Background the app during play and return: the score and the arena must
    be intact, and no time may be lost.

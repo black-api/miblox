@@ -63,9 +63,16 @@ node tools/cli/heui.js preview apps/gem-hunt   # run the game headlessly
 node tools/cli/heui.js build apps/gem-hunt     # → build/out/gem-hunt-debug.apk
 ```
 
-The APK lands in `build/out/`. It is signed with the debug key
-(`build/debug.keystore`) and installs on any device or emulator with
-Android 7.0 (API 24) or newer.
+The APK lands in `build/out/`. It is signed with the debug key at
+`~/.android/heui-debug.keystore` (pass `android`) and installs on any device
+or emulator with Android 7.0 (API 24) or newer.
+
+> **One key, one package.** The signing key lives outside the repository and
+> is created once, so every build of `dev.heui.gemhunt` is upgrade-compatible.
+> If Android ever refuses an update with *"There was a problem parsing the
+> package"*, the installed build was signed with a different key — uninstall
+> it (`adb uninstall dev.heui.gemhunt`) and install again. `heui doctor`
+> prints the key and its fingerprint.
 
 ## Writing a game
 

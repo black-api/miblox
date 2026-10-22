@@ -8,6 +8,7 @@
 // for every supported ABI.
 
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -107,6 +108,36 @@ export function buildNative(sdk, { debug = false } = {}) {
     if (fs.existsSync(so)) outputs.push(so);
   }
   return outputs;
+}
+
+/**
+ * Resolves the signing keystore.
+ *
+ * The key lives OUTSIDE any repository, in `~/.android/heui-debug.keystore`,
+ * so that every build of the same package — in any checkout, on any machine
+ * that has the key — is signed identically. Android refuses to replace an
+ * installed app with a build signed by a different key, and a per-checkout
+ * throwaway key produces exactly that failure ("There was a problem parsing
+ * the package"). Override with HEUI_KEYSTORE.
+ */
+export function resolveKeystore() {
+  if (process.env.HEUI_KEYSTORE) return path.resolve(process.env.HEUI_KEYSTORE);
+  return path.join(os.homedir(), '.android', 'heui-debug.keystore');
+}
+
+/** The SHA-256 fingerprint of the signing certificate, for support requests. */
+export function certificateFingerprint(keystore) {
+  try {
+    const output = execFileSync(
+      'keytool',
+      ['-list', '-v', '-keystore', keystore, '-storepass', 'android'],
+      { encoding: 'utf8' },
+    );
+    const match = output.match(/SHA256:\s*([0-9A-F:]+)/);
+    return match ? match[1] : 'unknown';
+  } catch (error) {
+    return 'unknown';
+  }
 }
 
 /**
@@ -285,7 +316,8 @@ export function buildApk(projectDir, { release = false, outDir = null, skipNativ
     stdio: 'inherit',
   });
 
-  const keystore = path.join(repoRoot, 'build', 'debug.keystore');
+  const keystore = resolveKeystore();
+  const alias = process.env.HEUI_KEY_ALIAS || 'androiddebugkey';
   if (!fs.existsSync(keystore)) {
     fs.mkdirSync(path.dirname(keystore), { recursive: true });
     execFileSync(
@@ -299,7 +331,7 @@ export function buildApk(projectDir, { release = false, outDir = null, skipNativ
         '-keypass',
         'android',
         '-alias',
-        'androiddebugkey',
+        alias,
         '-keyalg',
         'RSA',
         '-keysize',
@@ -307,10 +339,11 @@ export function buildApk(projectDir, { release = false, outDir = null, skipNativ
         '-validity',
         '10000',
         '-dname',
-        'CN=HeUi Debug,O=HeUi,C=US',
+        'CN=HeUi Debug, O=HeUi, C=US',
       ],
       { stdio: 'inherit' },
     );
+    log(`  signing  : created ${keystore}`);
   }
 
   const finalDir = outDir || path.join(repoRoot, 'build', 'out');
@@ -328,7 +361,13 @@ export function buildApk(projectDir, { release = false, outDir = null, skipNativ
       '--key-pass',
       'pass:android',
       '--ks-key-alias',
-      'androiddebugkey',
+      alias,
+      // v2 + v3 cover every device from Android 7.0 (API 24) upwards; apksigner
+      // skips the JAR (v1) scheme for that minSdk on its own.
+      '--v2-signing-enabled',
+      'true',
+      '--v3-signing-enabled',
+      'true',
       '--out',
       finalApk,
       aligned,
@@ -367,9 +406,20 @@ export function buildApk(projectDir, { release = false, outDir = null, skipNativ
   const size = fs.statSync(finalApk).size;
   log(`  apk      : ${path.relative(repoRoot, finalApk)} (${(size / 1024).toFixed(1)} kB)`);
   log(`  verify   : ${verify.split('\n')[0]}`);
+  log(`  signer   : ${keystore}`);
+  log(`  cert     : ${certificateFingerprint(keystore)}`);
   log(`  contents : ${entries.length} entries, game + host + native core present`);
 
-  return { apk: finalApk, badging, verify, size, entries, manifest: values };
+  return {
+    apk: finalApk,
+    badging,
+    verify,
+    size,
+    entries,
+    keystore,
+    certificate: certificateFingerprint(keystore),
+    manifest: values,
+  };
 }
 
 function main(argv) {
