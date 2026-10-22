@@ -18,6 +18,8 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import java.util.List;
+
 /**
  * The HeUi host activity.
  *
@@ -193,11 +195,30 @@ public class HeUiActivity extends Activity {
     }
 
     private String webViewPackage() {
+        // The API only exists from Android 8 and can return null, so the
+        // package manager is asked as well.
         try {
             if (Build.VERSION.SDK_INT >= 26) {
                 PackageInfo info = WebView.getCurrentWebViewPackage();
                 if (info != null) {
                     return info.packageName + " " + info.versionName;
+                }
+            }
+        } catch (Throwable ignored) {
+        }
+        try {
+            android.content.pm.PackageManager pm = getPackageManager();
+            android.content.Intent intent =
+                    new android.content.Intent(android.content.Intent.ACTION_VIEW,
+                            android.net.Uri.parse("https://example.invalid"));
+            List<android.content.pm.ResolveInfo> candidates =
+                    pm.queryIntentActivities(intent, 0);
+            if (candidates != null && !candidates.isEmpty()) {
+                String name = candidates.get(0).activityInfo.packageName;
+                try {
+                    return name + " " + pm.getPackageInfo(name, 0).versionName;
+                } catch (Throwable ignored) {
+                    return name;
                 }
             }
         } catch (Throwable ignored) {

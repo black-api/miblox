@@ -43,13 +43,20 @@ function copyTree(from, to) {
  * parse and the game never starts — a silent, flat screen.
  */
 export function checkWebViewCompatibility(code) {
+  // Inspect code only: string literals (CSS colours, messages) are stripped
+  // so that a value like '#ff8fa3' is not mistaken for a private field.
+  const source = code
+    .replace(/'(?:\\.|[^'\\])*'/g, "''")
+    .replace(/"(?:\\.|[^"\\])*"/g, '""')
+    .replace(/`(?:\\.|[^`\\])*`/g, '``');
+
   const banned = [
     { pattern: /\?\./, name: 'optional chaining (?.)', since: 'Chrome 80' },
     { pattern: /\?\?/, name: 'nullish coalescing (??)', since: 'Chrome 80' },
     { pattern: /\?\?=/, name: 'logical assignment (??=)', since: 'Chrome 85' },
     { pattern: /\|\|=/, name: 'logical assignment (||=)', since: 'Chrome 85' },
     { pattern: /&&=/, name: 'logical assignment (&&=)', since: 'Chrome 85' },
-    { pattern: /#\s*[A-Za-z_$][\w$]*\s*[;=(]/, name: 'private class fields', since: 'Chrome 74' },
+    { pattern: /#[A-Za-z_$][\w$]*\s*[;=(]/, name: 'private class fields', since: 'Chrome 74' },
     { pattern: /\bstatic\s*\{/, name: 'static class blocks', since: 'Chrome 94' },
     { pattern: /\.at\s*\(/, name: 'Array.prototype.at', since: 'Chrome 92' },
     { pattern: /\bstructuredClone\s*\(/, name: 'structuredClone', since: 'Chrome 98' },
@@ -60,9 +67,57 @@ export function checkWebViewCompatibility(code) {
     { pattern: /\.matchAll\s*\(/, name: 'String.matchAll', since: 'Chrome 73' },
   ];
   const problems = banned
-    .filter((rule) => rule.pattern.test(code))
+    .filter((rule) => rule.pattern.test(source))
     .map((rule) => `${rule.name} (needs ${rule.since})`);
   return problems;
+}
+
+/**
+ * Injects a diagnostic bootstrap into the host page.
+ *
+ * It is written in ES5 on purpose: it has to run on the oldest WebView we
+ * support, and it is the only code that still works when the game bundle
+ * itself fails to parse. It turns a silent failure into a readable message
+ * on the screen: the script error, the user agent and the browser version.
+ */
+export function injectDiagnostics(html) {
+  const bootstrap = `<script>
+/* HeUi diagnostics — ES5 on purpose: this must run on any WebView. */
+(function () {
+  function chromeVersion() {
+    var m = navigator.userAgent.match(/Chrome\\/([0-9.]+)/);
+    return m ? m[1] : 'unknown';
+  }
+  function show(title, detail) {
+    try {
+      var box = document.createElement('div');
+      box.setAttribute('style', 'position:fixed;top:0;left:0;right:0;bottom:0;' +
+        'background:#0d1020;color:#ff8fa3;font:12px monospace;padding:24px;' +
+        'white-space:pre-wrap;overflow:auto;z-index:99999');
+      box.appendChild(document.createTextNode(title + '\\n\\n' + detail));
+      document.body.appendChild(box);
+    } catch (e) {}
+  }
+  window.onerror = function (message, source, line, column) {
+    show('The game failed to start.', 'Error: ' + message + '\\n' +
+      'Source: ' + source + '\\nLine: ' + line + ':' + column + '\\n\\n' +
+      'Browser: Chrome ' + chromeVersion() + '\\n' +
+      'User agent: ' + navigator.userAgent);
+    return true;
+  };
+  setTimeout(function () {
+    if (!window.HEUI_READY) {
+      show('The game did not start.', 'No frame was rendered.\\n\\n' +
+        'Browser: Chrome ' + chromeVersion() + '\\n' +
+        'User agent: ' + navigator.userAgent + '\\n' +
+        'Errors above, if any, are the reason.');
+    }
+  }, 4000);
+})();
+</script>
+`;
+  if (html.includes('<!-- heui:diagnostics -->')) return html;
+  return html.replace('</head>', `${bootstrap}</head>`);
 }
 
 /**
@@ -136,7 +191,7 @@ export function buildBundle(projectDir, outDir) {
     `<script>window.HEUI_MANIFEST = ${JSON.stringify(runtimeManifest)};</script>\n` +
       '    <script src="./heui.js"></script>',
   );
-  fs.writeFileSync(path.join(outDir, 'index.html'), injected, 'utf8');
+  fs.writeFileSync(path.join(outDir, 'index.html'), injectDiagnostics(injected), 'utf8');
 
   const bytes = fs.statSync(path.join(outDir, 'heui.js')).size;
   return { outDir, modules: result.modules, bytes, manifest: runtimeManifest };

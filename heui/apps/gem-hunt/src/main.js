@@ -338,6 +338,20 @@ async function boot() {
 }
 
 boot().catch((error) => {
+  const message = String(error && error.stack ? error.stack : error);
   console.error('heui: boot failed', error);
-  window.HEUI_ERROR = String(error && error.stack ? error.stack : error);
+  window.HEUI_ERROR = message;
+  // Show the failure on screen: a silent flat screen helps nobody.
+  try {
+    const box = document.createElement('div');
+    box.setAttribute(
+      'style',
+      'position:fixed;top:0;left:0;right:0;bottom:0;background:#0d1020;color:#ff8fa3;' +
+        'font:12px monospace;padding:24px;white-space:pre-wrap;overflow:auto;z-index:99999',
+    );
+    box.appendChild(document.createTextNode('The game failed to start.\n\n' + message));
+    document.body.appendChild(box);
+  } catch (ignored) {
+    // Nothing else we can do here.
+  }
 });
