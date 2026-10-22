@@ -34,6 +34,33 @@ function copyTree(from, to) {
 }
 
 /**
+ * Checks that the bundle only uses syntax that old Android WebViews can
+ * parse.
+ *
+ * The system WebView on some ROMs (MIUI among them) is not updated with the
+ * Play Store, so it can be years behind. Optional chaining (`?.`) needs
+ * Chrome 80 (2020); if the bundle contains it, the whole script fails to
+ * parse and the game never starts — a silent, flat screen.
+ */
+export function checkWebViewCompatibility(code) {
+  const banned = [
+    { pattern: /\?\./, name: 'optional chaining (?.)', since: 'Chrome 80' },
+    { pattern: /\?\?/, name: 'nullish coalescing (??)', since: 'Chrome 80' },
+    { pattern: /\?\?=/, name: 'logical assignment (??=)', since: 'Chrome 85' },
+    { pattern: /#\s*[A-Za-z_$][\w$]*\s*[;=(]/, name: 'private class fields', since: 'Chrome 74' },
+    { pattern: /\bstatic\s*\{/, name: 'static class blocks', since: 'Chrome 94' },
+    { pattern: /\.at\s*\(/, name: 'Array.prototype.at', since: 'Chrome 92' },
+    { pattern: /\bstructuredClone\s*\(/, name: 'structuredClone', since: 'Chrome 98' },
+    { pattern: /\.replaceAll\s*\(/, name: 'String.replaceAll', since: 'Chrome 85' },
+    { pattern: /\bObject\.hasOwn\s*\(/, name: 'Object.hasOwn', since: 'Chrome 93' },
+  ];
+  const problems = banned
+    .filter((rule) => rule.pattern.test(code))
+    .map((rule) => `${rule.name} (needs ${rule.since})`);
+  return problems;
+}
+
+/**
  * Builds the runtime bundle for a project.
  * @returns {{outDir: string, modules: string[], bytes: number}}
  */
@@ -52,6 +79,14 @@ export function buildBundle(projectDir, outDir) {
   fs.mkdirSync(assetsDir, { recursive: true });
 
   fs.writeFileSync(path.join(outDir, 'heui.js'), result.code, 'utf8');
+
+  // The bundle runs inside the system WebView, which may be very old.
+  const incompatibilities = checkWebViewCompatibility(result.code);
+  if (incompatibilities.length > 0) {
+    throw new Error(
+      `the bundle uses syntax that old Android WebViews cannot parse: ${incompatibilities.join(', ')}`,
+    );
+  }
 
   // Static assets: everything under the project's assets/ folder, plus any
   // asset declared in the manifest. Both end up at the same place inside the

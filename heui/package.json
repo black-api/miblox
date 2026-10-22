@@ -22,6 +22,5 @@
     "release": "node full/release.js",
     "doctor": "node tools/cli/heui.js doctor",
     "cli": "node tools/cli/heui.js"
-  },
-  "devDependencies": {}
+  }
 }

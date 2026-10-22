@@ -66,7 +66,7 @@ async function boot() {
     joystick.originY = event.clientY;
     joystick.x = 0;
     joystick.y = 0;
-    canvas.setPointerCapture?.(event.pointerId);
+    if (canvas.setPointerCapture) canvas.setPointerCapture(event.pointerId);
   });
 
   canvas.addEventListener('pointermove', (event) => {
@@ -131,7 +131,7 @@ async function boot() {
 
     if (game.state.collected > before) {
       engine.audio.play('collect', { volume: 0.6 });
-      engine.platform.vibrate?.(0.03);
+      if (engine.platform.vibrate) engine.platform.vibrate(0.03);
     }
     if (game.state.timeLeft < beforeTime - 0.3) {
       engine.audio.play('hit', { volume: 0.4 });

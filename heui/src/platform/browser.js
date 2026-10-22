@@ -28,7 +28,7 @@ export class BrowserPlatform {
     if (!this.audioContext || !clip.url) return;
     try {
       const source = this.audioContext.createBufferSource();
-      source.buffer = this.audioContext.__buffers?.get(clip.name);
+      source.buffer = this.audioContext.__buffers && this.audioContext.__buffers.get(clip.name);
       if (!source.buffer) return;
       source.loop = player.loop;
       const gain = this.audioContext.createGain();
@@ -67,7 +67,7 @@ export class BrowserPlatform {
       };
     };
     on(canvas, 'pointerdown', (event) => {
-      canvas.setPointerCapture?.(event.pointerId);
+      if (canvas.setPointerCapture) canvas.setPointerCapture(event.pointerId);
       const { x, y } = toLocal(event);
       input.pointerDown(event.pointerId, x, y);
     });
