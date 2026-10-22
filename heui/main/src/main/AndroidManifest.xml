@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  HeUi host manifest template.
+
+  The build script substitutes the ${...} placeholders from the project
+  manifest (project.heui.json) before running aapt2.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="${applicationId}"
+    android:versionCode="${versionCode}"
+    android:versionName="${versionName}">
+
+    <uses-sdk android:minSdkVersion="${minSdk}" android:targetSdkVersion="${targetSdk}" />
+
+${permissions}
+
+    <application
+        android:label="${appLabel}"
+        android:icon="@mipmap/ic_launcher"
+        android:hardwareAccelerated="true"
+        android:allowBackup="true"
+        android:supportsRtl="true"
+        android:theme="@android:style/Theme.Material.NoActionBar.Fullscreen">
+
+        <activity
+            android:name="dev.heui.HeUiActivity"
+            android:exported="true"
+            android:screenOrientation="${screenOrientation}"
+            android:launchMode="singleTask"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode|density|smallestScreenSize"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

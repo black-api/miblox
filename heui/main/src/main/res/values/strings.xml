@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The app name is substituted by the build script. -->
+<resources>
+    <string name="app_name">${appLabel}</string>
+    <string name="heui_engine_version">${engineVersion}</string>
+</resources>

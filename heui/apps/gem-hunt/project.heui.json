@@ -1,0 +1,26 @@
+// HeUi project manifest.
+// The converter reads this file to build the runtime bundle that ships in
+// the APK's assets/heui/ directory.
+
+{
+  "name": "gem-hunt",
+  "displayName": "Gem Hunt",
+  "version": "0.1.0",
+  "entry": "src/main.js",
+  "engine": "0.1.0",
+  "orientation": "any",
+  "width": 480,
+  "height": 270,
+  "assets": [
+    { "name": "gems", "path": "assets/gems.json", "type": "json" }
+  ],
+  "android": {
+    "package": "dev.heui.gemhunt",
+    "minSdk": 24,
+    "targetSdk": 35,
+    "versionCode": 1,
+    "versionName": "0.1.0",
+    "permissions": ["android.permission.VIBRATE"],
+    "immersive": true
+  }
+}

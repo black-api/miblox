@@ -1,4 +1,5 @@
-build/
+# MIBLOX build output (root only — heui/build/ is source)
+/build/
 node_modules/
 *.keystore
 *.jks

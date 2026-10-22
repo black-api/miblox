@@ -1,0 +1,11 @@
+{
+  "gems": [
+    { "name": "ruby", "color": "#ff4d6d", "value": 1 },
+    { "name": "sapphire", "color": "#4dc9ff", "value": 1 },
+    { "name": "topaz", "color": "#ffd166", "value": 2 },
+    { "name": "emerald", "color": "#8affc1", "value": 2 },
+    { "name": "amethyst", "color": "#c08bff", "value": 3 }
+  ],
+  "player": { "color": "#ffffff" },
+  "hazard": { "color": "#3a4266" }
+}

@@ -1,0 +1,12 @@
+node_modules/
+build/native/
+build/native-test/
+build/out/
+build/staging/
+build/release/
+tmp/
+*.log
+.DS_Store
+local.properties
+*.keystore
+*.jks

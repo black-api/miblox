@@ -1,0 +1,27 @@
+{
+  "name": "heui",
+  "version": "0.1.0",
+  "private": true,
+  "description": "HeUi — 2D game engine with an Android (APK) exporter",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "bin": {
+    "heui": "tools/cli/heui.js"
+  },
+  "scripts": {
+    "test": "node --test \"tests/*.test.js\"",
+    "test:native": "cmake -S native -B build/native-test -DHE_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug && cmake --build build/native-test -j && ctest --test-dir build/native-test --output-on-failure",
+    "test:all": "npm run test && npm run test:native",
+    "build:native": "cmake -S native -B build/native -DCMAKE_BUILD_TYPE=Release && cmake --build build/native -j",
+    "bundle": "node converter/src/cli.js bundle-all",
+    "preview": "node tools/preview.js apps/gem-hunt",
+    "apk": "node build/build-apk.js apps/gem-hunt",
+    "apk:release": "node build/build-apk.js apps/gem-hunt --release",
+    "release": "node full/release.js",
+    "doctor": "node tools/cli/heui.js doctor",
+    "cli": "node tools/cli/heui.js"
+  },
+  "devDependencies": {}
+}
